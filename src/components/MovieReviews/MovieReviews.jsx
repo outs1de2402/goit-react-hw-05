@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import styles from "./MovieReviews.module.css";
 import { useParams } from "react-router-dom";
 
 const MovieReviews = () => {
@@ -11,7 +10,8 @@ const MovieReviews = () => {
     axios
       .get(`https://api.themoviedb.org/3/movie/${movieId}/reviews`, {
         headers: {
-          Authorization: "Bearer api_read_access_token",
+          Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiZWI4OTI5OTZhYTI0ZGJiZjliM2FiZjM2YzlmZjcwMiIsIm5iZiI6MTc0NTY5MjY3MC4yNjEsInN1YiI6IjY4MGQyN2ZlZjc2OWYwYWY2YTgwZjAyZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.8phHT-NYpX440NI5MyQx5lDBcX7KsA9tNYXCffrUp9w",
         },
       })
       .then((response) => setReviews(response.data.results))
@@ -19,7 +19,7 @@ const MovieReviews = () => {
   }, [movieId]);
 
   return (
-    <div className={styles.container}>
+    <div>
       <h2>Reviews</h2>
       <ul>
         {reviews.map((review) => (
