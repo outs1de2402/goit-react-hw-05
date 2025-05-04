@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getMovieCredits } from "../../services/tmdbApi";
 
-export default function MovieCast() {
+const MovieCast = () => {
   const { movieId } = useParams();
   const [cast, setCast] = useState([]);
 
@@ -29,4 +29,6 @@ export default function MovieCast() {
       ))}
     </ul>
   );
-}
+};
+
+export default MovieCast;
