@@ -1,39 +1,63 @@
-import { useEffect, useState } from "react";
-import { useParams, Link, Outlet } from "react-router-dom";
-import axios from "axios";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
+import {
+  Link,
+  Outlet,
+  useParams,
+  useLocation,
+  Route,
+  Routes,
+} from "react-router-dom";
+import { getMovieDetails } from "../../services/tmdbApi";
+
+const MovieCast = lazy(() => import("../../components/MovieCast/MovieCast"));
+const MovieReviews = lazy(() =>
+  import("../../components/MovieReviews/MovieReviews")
+);
 
 const MovieDetailsPage = () => {
   const { movieId } = useParams();
+  const location = useLocation();
+  const backLink = useRef(location.state?.from || "/");
   const [movie, setMovie] = useState(null);
 
   useEffect(() => {
-    axios
-      .get(`https://api.themoviedb.org/3/movie/${movieId}`, {
-        headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiZWI4OTI5OTZhYTI0ZGJiZjliM2FiZjM2YzlmZjcwMiIsIm5iZiI6MTc0NTY5MjY3MC4yNjEsInN1YiI6IjY4MGQyN2ZlZjc2OWYwYWY2YTgwZjAyZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.8phHT-NYpX440NI5MyQx5lDBcX7KsA9tNYXCffrUp9w",
-        },
-      })
-      .then((response) => setMovie(response.data))
-      .catch((error) => console.error(error));
+    async function fetchDetails() {
+      try {
+        const data = await getMovieDetails(movieId);
+        setMovie(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchDetails();
   }, [movieId]);
 
-  if (!movie) return <div>Loading...</div>;
+  if (!movie) return <div>Loading movie details...</div>;
 
   return (
     <div>
+      <Link to={backLink.current}>⬅ Back</Link>
       <h1>{movie.title}</h1>
-      <img
-        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-        alt={movie.title}
-      />
-      <p>{movie.overview}</p>
+      <p>User score: {movie.vote_average}</p>
+      <p>Overview: {movie.overview}</p>
+      <p>Genres: {movie.genres.map((g) => g.name).join(", ")}</p>
 
-      <nav>
-        <Link to="cast">Cast</Link> | <Link to="reviews">Reviews</Link>
-      </nav>
+      <h3>Additional information</h3>
+      <ul>
+        <li>
+          <Link to="cast">Cast</Link>
+        </li>
+        <li>
+          <Link to="reviews">Reviews</Link>
+        </li>
+      </ul>
 
-      <Outlet />
+      <Suspense fallback={<div>Loading additional info...</div>}>
+        <Routes>
+          <Route path="cast" element={<MovieCast />} />
+          <Route path="reviews" element={<MovieReviews />} />
+        </Routes>
+      </Suspense>
     </div>
   );
 };

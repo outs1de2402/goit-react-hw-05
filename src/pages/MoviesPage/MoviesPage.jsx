@@ -1,52 +1,41 @@
-// src/pages/MoviesPage.jsx
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
-import { useState } from "react";
-import axios from "axios";
+import { searchMovies } from "../../services/tmdbApi";
+import MovieList from "../../components/MovieList/MovieList";
 
 const MoviesPage = () => {
-  const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const query = searchParams.get("query") || "";
 
-  const handleSearch = async () => {
-    try {
-      const response = await axios.get(
-        `https://api.themoviedb.org/3/search/movie?query=${query}`,
-        {
-          headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiZWI4OTI5OTZhYTI0ZGJiZjliM2FiZjM2YzlmZjcwMiIsIm5iZiI6MTc0NTY5MjY3MC4yNjEsInN1YiI6IjY4MGQyN2ZlZjc2OWYwYWY2YTgwZjAyZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.8phHT-NYpX440NI5MyQx5lDBcX7KsA9tNYXCffrUp9w`,
-          },
-        }
-      );
-      setMovies(response.data.results);
-    } catch (error) {
-      console.error("Error searching movies:", error);
+  useEffect(() => {
+    if (!query) return;
+    async function fetchSearch() {
+      try {
+        const data = await searchMovies(query);
+        setMovies(data.results);
+      } catch (error) {
+        console.error(error);
+      }
     }
+    fetchSearch();
+  }, [query]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const value = e.target.elements.query.value.trim();
+    setSearchParams({ query: value });
   };
 
   return (
     <div>
-      <h2>Search Movies</h2>
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Enter movie name"
-      />
-      <button onClick={handleSearch}>Search</button>
-
-      <ul>
-        {movies.map((movie) => (
-          <li key={movie.id}>
-            <img
-              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-              alt={movie.title}
-            />
-            <h3>{movie.title}</h3>
-          </li>
-        ))}
-      </ul>
+      <form onSubmit={handleSubmit}>
+        <input name="query" type="text" defaultValue={query} />
+        <button type="submit">Search</button>
+      </form>
+      <MovieList movies={movies} />
     </div>
   );
 };
-
 export default MoviesPage;
