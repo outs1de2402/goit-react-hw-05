@@ -7,7 +7,7 @@ import {
   Route,
   Routes,
 } from "react-router-dom";
-import { getMovieDetails } from "../../services/tmdbApi";
+import { getMovieDetails } from "../../services/tmdbAPI";
 
 const MovieCast = lazy(() => import("../../components/MovieCast/MovieCast"));
 const MovieReviews = lazy(() =>
